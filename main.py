@@ -174,7 +174,7 @@ class EnergyData:
             return f"The table {table_name} is created."
         except Exception as e:
             None
-#WORK ON THIS - HOW TO CHECK IF TABLE EXISTS
+
     def add_data_to_a_table(self, table_name: str, start_year, end_year):
         try:
             self.connect_to_postgresql()
