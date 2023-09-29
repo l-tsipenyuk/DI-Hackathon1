@@ -178,41 +178,27 @@ class EnergyData:
     def add_data_to_a_table(self, table_name: str, start_year, end_year):
         try:
             self.connect_to_postgresql()
-            if not self.check_table_existence(table_name):
-                return "Table doesn't exist."
-            else:
-                date = list(range(start_year, end_year+1))
-                data = self.histdata(start_year, end_year)
-                
-                all_values = []
 
-                for fuel_type, row in data.iterrows():
-                    values = list(row)
-                    all_values.append((fuel_type, values))
+            date = list(range(start_year, end_year+1))
+            data = self.histdata(start_year, end_year)
+            all_values = []
 
-                query = f'''
-                    insert into {table_name} (fuel_type, {', '.join([f'"{year}"' for year in date])})
-                    values
-                    {', '.join([f"('{fuel_type}', {', '.join([str(v) for v in values])})" for fuel_type, values in all_values])};
-                '''
+            for fuel_type, row in data.iterrows():
+                values = list(row)
+                all_values.append((fuel_type, values))
 
-                cursor.execute(query) 
-                connection.commit()
-                return f"The data is added into {table_name}."
+            query = f'''
+                insert into {table_name} (fuel_type, {', '.join([f'"{year}"' for year in date])})
+                values
+                {', '.join([f"('{fuel_type}', {', '.join([str(v) for v in values])})" for fuel_type, values in all_values])};
+            '''
+
+            cursor.execute(query) 
+            connection.commit()
+            return f"The data is added into '{table_name}' table."
         except Exception as e:
-            None
+            return f"Data export failed: the table '{table_name}' doesn't exist."
     
-    def check_table_existence(self, table_name):
-        try:
-            cursor = self.connection.cursor()
-            cursor.execute("select exists (select 1 from information_schema.tables where table_name = %s);", (table_name,))
-            exists = cursor.fetchone()[0]
-            cursor.close()
-            return exists
-        except psycopg2.Error as e:
-            print(f"Error checking table existence: {e}")
-            return False
-
     def delete_the_table(self, table_name: str):
         try:
             self.connect_to_postgresql()
@@ -222,15 +208,15 @@ class EnergyData:
 
             cursor.execute(query) 
             connection.commit()
-            return f"The table {table_name} is deleted."
+            return f"The table '{table_name}' is deleted."
         except Exception as e:
-            None
+            return f"Table deletion failed: the table '{table_name}' was not found."
 
 
  
  
 
-a = EnergyData('Germany')
+# a = EnergyData('Germany')
 # a.histdata(2021, 2022)
 # print(a.histdata(2021, 2022))
 # print(a.get_the_share('Germany', 1995))

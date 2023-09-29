@@ -1,4 +1,3 @@
-
 from main import EnergyData
 
 def getting_started():
@@ -130,8 +129,7 @@ def option_e():
         user_input_level2 = input("Choose an action:\n"
         "a) Create a table in PostgreSQL\n"
         "b) Fill in the data to an existing table in PostgreSQL\n"
-        "c) Delete the table in PostgreSQL\n"
-        "d) Go back to menu (Q)\n")
+        "c) Delete the table in PostgreSQL\n")
 
         if user_input_level2 == "a":
             while True:
@@ -161,7 +159,7 @@ def option_e():
                         return "OK, now you just have an empty table."
                 except ValueError:
                     print("The data is available between 1985 and 2022.")     
-#WORK ON THIS
+
         if user_input_level2 == "b":
             while True:
                 table_name = input("Type in the table name (without spaces). The table should already exist!:\n")
@@ -182,21 +180,33 @@ def option_e():
                     if start_year < 1985 or last_year > 2022:
                         raise ValueError
                     result = a.add_data_to_a_table(table_name, start_year, last_year)
+                    return result
                 except ValueError:
                     print("The data is available between 1985 and 2022.")
 
-        if user_input_level2 == "D":
-            table_name = input("Type in the table name (without spaces). The table should already exist!:\n")
-            country = input("Type in the country:\n")
-            start_year = int(input("Type in the first year:\n"))
-            last_year = int(input("Type in the last year:\n"))
+        if user_input_level2 == "c":
+            while True:
+                table_name = input("Type in the table name (without spaces). The table should already exist!:\n")
+                country = input("Insert country:\n")
+                a = EnergyData(country)
+                if a.valid_country() == False:
+                    print(f"No values found for {country}.")
+                    choice = input("Type 'quit' to exit or press Enter to try agan: \n")
+                    if choice.lower == 'quit':
+                        return
+                else:
+                    break
 
-            a = EnergyData(country)
-            result = a.delete_the_table(table_name)
-            return result          
+            while True:
+                try:
+                    start_year = int(input("Insert the first year:\n"))
+                    last_year = int(input("Insert the last year:\n"))
+                    if start_year < 1985 or last_year > 2022:
+                        raise ValueError
+                    result = a.delete_the_table(table_name)
+                    return result
+                except ValueError:
+                    print("The data is available between 1985 and 2022.")     
         
        
-
-
-
 print(getting_started())
