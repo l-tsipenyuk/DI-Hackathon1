@@ -214,19 +214,7 @@ class EnergyData:
 
 
  
- 
 
-# a = EnergyData('Germany')
-# a.histdata(2021, 2022)
-# print(a.histdata(2021, 2022))
-# print(a.get_the_share('Germany', 1995))
-# print(a.histdata(2021, 2022))
-# print(a.compare_countries(2020))
-# a.export_to_excel(1985,2022, "Germany")
-# a.connect_to_postgress()
-# print(a.create_a_table('energy_mix_ger', 2015, 2022))
-# print(a.add_data_to_a_table('energy_mix_ger', 2015, 2022))
-# print(a.delete_the_table('energy_mix_ger'))
 
 
 
