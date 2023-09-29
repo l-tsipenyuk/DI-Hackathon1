@@ -135,7 +135,7 @@ class EnergyData:
         df.to_excel(file_path, index=True)
         print(f"The data is exported to the '{country}.xlsx' file.")
 
-#methods to work with SQL Postgress
+#methods to work with PostgreSQL
 
     def connect_to_postgresql(self):
         DB_NAME = "energy_mix"
