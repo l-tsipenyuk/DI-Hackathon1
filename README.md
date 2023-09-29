@@ -10,14 +10,14 @@ Data Source: https://www.energyinst.org/statistical-review/resources-and-data-do
 
 2. **Data Analysis:** There are various functionalities to analyze the electricity generation data by country. Users can input specific queries:
 
-   - User inputs a country and receives historical energy production data categorized by source from the oldest available date to the most recent.
-   - Users can query a country, year and get the electricity generation mix in percentage.
-   - Users can query several countries, year and get the electricity generation mix in percentage to compare these countries.
-   - Users can export fetched historical data to Excel.
-   - Users can export the fetched data for a specific country in a PostgreSQL database (options available: create a table, fill in the data and delete the table in the database).
+   - Retrieve historical energy generation data in TWh. User inputs a country and receives historical energy production data categorized by source from the oldest available date to the most recent.
+   - Query electricity generation mix by share. Users can query a specific country and year to get generation mix percentage. Additionally, there is an option to compare generation mix in a country across multiple years.
+   - Compare electricity generation mix across countries. Users can query several countries and year enabling comparison between these countries.
+   - Export historical data to Excel. Users can export fetched historical data to Excel for further analysis.
+   - Export data to PostgreSQL Database. Users can export the fetched data for a specific country to a PostgreSQL database with the following actions available: create a table, fill in the data and delete the table in the database.
  
 
-3. **User Interaction:** There is a user-friendly command-line interface that allows users to input commands and queries.
+3. **User Interaction:** A user-friendly command-line interface enables users to input commands, queries and handles potential errors.
 
 
 The project contributes to environmental awareness by providing a tool for analyzing shift towards energy transition in different countries from 1985 to 2022. Users can gain insights into energy generation patterns and potentially more effectively analyze countries' energy policies.
