@@ -32,7 +32,7 @@ class EnergyData:
                 return True 
         return False  
 
-    #methods to collect the generation mix from various spreadsheets
+#methods to collect generation mix in TWh from multiple spreadsheets
 
     def fetch_data65(self, worksheet, start_year, end_year):
         values65 = []
@@ -84,18 +84,7 @@ class EnergyData:
         df.reset_index(drop=True)
         return df.T
 
-# method to export hist_data to excel
-
-    def export_to_excel(self, start_year, end_year, country):
-        data = self.histdata(start_year, end_year)
-        df = pd.DataFrame(data)
-        name = f"{country}.xlsx"
-        file_path = os.path.join(dir_path, name)
-        df.to_excel(file_path, index=True)
-        # print(df)
-
-
-# method to get the generation mix in percentage for a specific country 
+# method to get generation mix percentage for one country 
 
     def get_the_share(self, country, year):
         table = self.histdata(year, year)
@@ -104,24 +93,47 @@ class EnergyData:
         table = table.sort_values(by='Share, %', ascending = False)
         return table
 
-# method to compare several countries' generation mix
+# method to get generation mix percentage for multiple countries 
 
-    def compare_countries(self, year):
-                
-        country_list = input("Type in several countries separated by commas.\n").split(',')
-        country_list = [country.strip() for country in country_list]
-        table = {}  
+    def compare_countries(self):
+        try:
+            year = int(input("Insert the year:\n"))
+            if year < 1985 or year > 2022:
+                raise ValueError("The year must be between 1985 and 2022.")
+            
+            country_list = input("Insert several countries separated by commas:\n").split(',')
+            country_list = [country.strip() for country in country_list]
+            
+            all_countries_valid = all(EnergyData(country).valid_country() for country in country_list)
+            
+            if all_countries_valid == False:
+                print("One or more countries in the list are invalid.")
+                return
 
-        for country in country_list:
-            a = EnergyData(country)
-            table[country] = a.get_the_share(country, year).rename(columns= {"Share, %": country}).drop([year], axis=1)
+            table = {}
 
-        result = table[country_list[0]]
+            for country in country_list:
+                a = EnergyData(country)
+                table[country] = a.get_the_share(country, year).rename(columns={"Share, %": country}).drop([year], axis=1)
 
-        for country in country_list[1:]:
-            result = pd.merge(result, table[country], left_index=True, right_index=True)
+            result = table[country_list[0]]
 
-        return result
+            for country in country_list[1:]:
+                result = pd.merge(result, table[country], left_index=True, right_index=True)
+
+            print(result)
+        except ValueError as e:
+            print(e)
+
+# method to export hist_data to excel
+
+    def export_to_excel(self, start_year, end_year, country):
+        data = self.histdata(start_year, end_year)
+        df = pd.DataFrame(data)
+        name = f"{country}.xlsx"
+        file_path = os.path.join(dir_path, name)
+        df.to_excel(file_path, index=True)
+        print(f"The data is exported to the '{country}.xlsx' file.")
 
 #methods to work with SQL Postgress
 
@@ -162,31 +174,45 @@ class EnergyData:
             return f"The table {table_name} is created."
         except Exception as e:
             None
-
+#WORK ON THIS - HOW TO CHECK IF TABLE EXISTS
     def add_data_to_a_table(self, table_name: str, start_year, end_year):
         try:
             self.connect_to_postgresql()
-            date = list(range(start_year, end_year+1))
-            data = self.histdata(start_year, end_year)
-            
-            all_values = []
+            if not self.check_table_existence(table_name):
+                return "Table doesn't exist."
+            else:
+                date = list(range(start_year, end_year+1))
+                data = self.histdata(start_year, end_year)
+                
+                all_values = []
 
-            for fuel_type, row in data.iterrows():
-                values = list(row)
-                all_values.append((fuel_type, values))
+                for fuel_type, row in data.iterrows():
+                    values = list(row)
+                    all_values.append((fuel_type, values))
 
-            query = f'''
-                insert into {table_name} (fuel_type, {', '.join([f'"{year}"' for year in date])})
-                values
-                {', '.join([f"('{fuel_type}', {', '.join([str(v) for v in values])})" for fuel_type, values in all_values])};
-            '''
+                query = f'''
+                    insert into {table_name} (fuel_type, {', '.join([f'"{year}"' for year in date])})
+                    values
+                    {', '.join([f"('{fuel_type}', {', '.join([str(v) for v in values])})" for fuel_type, values in all_values])};
+                '''
 
-            cursor.execute(query) 
-            connection.commit()
-            return f"The data is added into {table_name}."
+                cursor.execute(query) 
+                connection.commit()
+                return f"The data is added into {table_name}."
         except Exception as e:
             None
     
+    def check_table_existence(self, table_name):
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("select exists (select 1 from information_schema.tables where table_name = %s);", (table_name,))
+            exists = cursor.fetchone()[0]
+            cursor.close()
+            return exists
+        except psycopg2.Error as e:
+            print(f"Error checking table existence: {e}")
+            return False
+
     def delete_the_table(self, table_name: str):
         try:
             self.connect_to_postgresql()
@@ -205,10 +231,12 @@ class EnergyData:
  
 
 a = EnergyData('Germany')
+# a.histdata(2021, 2022)
+# print(a.histdata(2021, 2022))
 # print(a.get_the_share('Germany', 1995))
 # print(a.histdata(2021, 2022))
 # print(a.compare_countries(2020))
-a.export_to_excel(1985,2022, "Germany")
+# a.export_to_excel(1985,2022, "Germany")
 # a.connect_to_postgress()
 # print(a.create_a_table('energy_mix_ger', 2015, 2022))
 # print(a.add_data_to_a_table('energy_mix_ger', 2015, 2022))

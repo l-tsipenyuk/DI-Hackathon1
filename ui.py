@@ -1,70 +1,189 @@
-# check this! https://www.tutorialspoint.com/python/python_gui_programming.htm#:~:text=Tkinter%20is%20the%20standard%20GUI,to%20the%20Tk%20GUI%20toolkit.
+
 from main import EnergyData
 
 def getting_started():
-    user_input = input("Welcome to BP Energy data tool. Please choose an action (typing the bullet letter):\na) View a country's electricity generation mix over time \nb) Get the generation mix in percentage for one country \nc)Get the generation mix in percentage for several countries \nd) Export the country's energy mix historical data to Excel \ne) Export the country's energy mix to PostgreSQL db \nExit \n")
-    if user_input == "a":
+    empty_str = ""
+    user_input = input("Welcome to Energy Generation Tracker. Choose an action (i.e. a):\n"
+    "a) Get country's electricity generation mix in TWh over time\n" 
+    "b) Get generation mix percentage for one country\n"
+    "c) Get generation mix percentage for multiple countries\n"
+    "d) Export country's energy mix data in TWh to Excel\n"
+    "e) Export country's energy mix data in TWh to PostgreSQL db\n"
+    "Type 'Exit' to quit\n")
 
-        print("You can choose the country and the time range for the statistics.")
-        country = input("Type in the country:\n")
-        start_year = int(input("Type in the first year:\n"))
-        last_year = int(input("Type in the last year:\n"))
-        a = EnergyData(country)
-        if a.valid_country() == False:
-            print(f"No values found for {country}.")
-        else:
-            return a.histdata(start_year, last_year)
+    if user_input == "a":
+        return option_a()
 
     if user_input == "b":
-        country = input("Type in the country:\n")
-        start_year = int(input("Type in the year:\n"))
-        last_year = start_year
-        a = EnergyData(country)
-        result = a.get_the_share(country, start_year)
-        print(result)
-
-        while True:
-            user_input_level3 = input("Do you want to check another year for the same country?(Yes or No)\n")
-            if user_input_level3.lower() == "yes":
-                start_year = int(input("Type in the other year.\n"))
-                result = a.get_the_share(country, start_year)
-                print(result)
-            elif user_input_level3.lower() == "no":
-                break
+        result = option_b()
+        if result == None:
+            return empty_str
+        else:
+            return result
 
     if user_input == "c":
-        sdsd
+        a = EnergyData('default_country')
+        result = a.compare_countries()
+        if result == None:
+            return empty_str
+        else:
+            return result
 
     if user_input == "d":
-        sdsd
+        result = option_d()
+        if result == None:
+            return empty_str
+        else:
+            return result
 
     if user_input == "e":
-        user_input_level2 = input("Please choose what you want to do:\n Create a table in PostgreSQL (C) \n Fill in the data to an existing table in PostgreSQL (F) \n Delete the table in PostgreSQL (D)\n Go back to menu (Q)\n")
-
-        if user_input_level2 == "C":
-            table_name = input("Type in the table name (without spaces):\n")
-            country = input("Type in the country:\n")
-            start_year = int(input("Type in the first year:\n"))
-            last_year = int(input("Type in the last year:\n"))
-
-            a = EnergyData(country)
-            result = a.create_a_table(table_name, start_year, last_year)
-            user_input_level3 = input("Do you want to add the data? (Yes or No)\n")
-            if user_input_level3.lower() == "yes":
-                result = a.add_data_to_a_table(table_name, start_year, last_year)
-                return result
-            if user_input_level3.lower() == "no":
-                return "OK, now you just have an empty table."
-
-        if user_input_level2 == "F":
-            table_name = input("Type in the table name (without spaces). The table should already exist!:\n")
-            country = input("Type in the country:\n")
-            start_year = int(input("Type in the first year:\n"))
-            last_year = int(input("Type in the last year:\n"))
-
-            a = EnergyData(country)
-            result = a.add_data_to_a_table(table_name, start_year, last_year)
+        result = option_e()
+        if result == None:
+            return empty_str
+        else:
             return result
+        
+    if user_input == "Exit":
+        return empty_str
+
+# functions handling user options
+        
+def option_a():
+        print("You can choose the country and the time range for the statistics.")
+
+        while True:
+            country = input("Insert country:\n")
+            a = EnergyData(country)
+            if a.valid_country() == False:
+                print(f"No values found for {country}.")
+                choice = input("Type 'quit' to exit or press Enter to try agan: \n")
+                if choice.lower == 'quit':
+                    return
+            else:
+                break
+
+        while True:
+            try:
+                start_year = int(input("Insert the first year:\n"))
+                last_year = int(input("Insert the last year:\n"))
+                if start_year < 1985 or last_year > 2022:
+                    raise ValueError
+                return a.histdata(start_year, last_year)
+            except ValueError:
+                print("The data is available between 1985 and 2022.")
+
+def option_b():
+    while True:
+        country = input("Insert country:\n")
+        a = EnergyData(country)
+        if not a.valid_country():
+            print(f"No values found for {country}.")
+            choice = input("Type 'quit' to exit or press Enter to try again: \n")
+            if choice.lower() == 'quit':
+                return
+        else:
+            break
+
+    while True:
+        try:
+            start_year = int(input("Insert the year:\n"))
+            last_year = start_year
+            if start_year < 1985 or last_year > 2022:
+                raise ValueError
+            result = a.get_the_share(country, start_year)
+            print(result)
+
+            while True:
+                user_input_level3 = input("Do you want to check another year for the same country? (Yes or No)\n")
+                if user_input_level3.lower() == "yes":
+                    start_year = int(input("Insert a different year.\n"))
+                    result = a.get_the_share(country, start_year)
+                    print(result)
+                elif user_input_level3.lower() == "no":
+                    return 
+        except ValueError:
+            print("The data is available between 1985 and 2022.")
+
+def option_d():
+        while True:
+            country = input("Insert country:\n")
+            a = EnergyData(country)
+            if a.valid_country() == False:
+                print(f"No values found for {country}.")
+                choice = input("Type 'quit' to exit or press Enter to try agan: \n")
+                if choice.lower == 'quit':
+                    return
+            else:
+                break
+
+        while True:
+            try:
+                start_year = int(input("Insert the first year:\n"))
+                last_year = int(input("Insert the last year:\n"))
+                if start_year < 1985 or last_year > 2022:
+                    raise ValueError
+                return a.export_to_excel(start_year, last_year, country)
+            except ValueError:
+                print("The data is available between 1985 and 2022.")
+
+def option_e():
+        user_input_level2 = input("Choose an action:\n"
+        "a) Create a table in PostgreSQL\n"
+        "b) Fill in the data to an existing table in PostgreSQL\n"
+        "c) Delete the table in PostgreSQL\n"
+        "d) Go back to menu (Q)\n")
+
+        if user_input_level2 == "a":
+            while True:
+                table_name = input("Type in the table name (without spaces):\n")
+                country = input("Insert country:\n")
+                a = EnergyData(country)
+                if a.valid_country() == False:
+                    print(f"No values found for {country}.")
+                    choice = input("Type 'quit' to exit or press Enter to try agan: \n")
+                    if choice.lower == 'quit':
+                        return
+                else:
+                    break
+
+            while True:
+                try:
+                    start_year = int(input("Insert the first year:\n"))
+                    last_year = int(input("Insert the last year:\n"))
+                    if start_year < 1985 or last_year > 2022:
+                        raise ValueError
+                    result = a.create_a_table(table_name, start_year, last_year)
+                    user_input_level3 = input("Do you want to add the data? (Yes or No)\n")
+                    if user_input_level3.lower() == "yes":
+                        result = a.add_data_to_a_table(table_name, start_year, last_year)
+                        return result
+                    if user_input_level3.lower() == "no":
+                        return "OK, now you just have an empty table."
+                except ValueError:
+                    print("The data is available between 1985 and 2022.")     
+#WORK ON THIS
+        if user_input_level2 == "b":
+            while True:
+                table_name = input("Type in the table name (without spaces). The table should already exist!:\n")
+                country = input("Insert country:\n")
+                a = EnergyData(country)
+                if a.valid_country() == False:
+                    print(f"No values found for {country}.")
+                    choice = input("Type 'quit' to exit or press Enter to try agan: \n")
+                    if choice.lower == 'quit':
+                        return
+                else:
+                    break
+
+            while True:
+                try:
+                    start_year = int(input("Insert the first year:\n"))
+                    last_year = int(input("Insert the last year:\n"))
+                    if start_year < 1985 or last_year > 2022:
+                        raise ValueError
+                    result = a.add_data_to_a_table(table_name, start_year, last_year)
+                except ValueError:
+                    print("The data is available between 1985 and 2022.")
 
         if user_input_level2 == "D":
             table_name = input("Type in the table name (without spaces). The table should already exist!:\n")
@@ -74,12 +193,9 @@ def getting_started():
 
             a = EnergyData(country)
             result = a.delete_the_table(table_name)
-            return result
+            return result          
         
-        if user_input_level2 == "Q":
-            getting_started()
-        
-
+       
 
 
 
