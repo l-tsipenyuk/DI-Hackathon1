@@ -3,7 +3,7 @@
 **Project Title:** Energy Generation Tracker
 
 **Project Description:**
-Python-based command-line tool that allows users to track and analyze energy generation data from an open database. The tool should use Object-Oriented Programming principles to structure the code effectively and implement the following features:
+Python-based command-line tool that allows users to track and analyze energy generation data from an open database. The tool uses Object-Oriented Programming principles to structure the code effectively and implement the following features:
 
 1. **Data Retrieval:** The tool is able to download and work with data from BP Energy Stats Excel database.
 Data Source: https://www.energyinst.org/statistical-review/resources-and-data-downloads
