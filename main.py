@@ -32,6 +32,14 @@ class EnergyData:
                 return True 
         return False  
 
+#another check since list of countries on el generation from coal is smaller than on hydro
+    def valid_country_smaler_range(self):
+        for row in range(5, 55): 
+            cell_in_column_A = ws_coal.cell(row=row, column=1).value
+            if cell_in_column_A == self.country:
+                return True 
+        return False
+
 #methods to collect generation mix in TWh from multiple spreadsheets
 
     def fetch_data65(self, worksheet, start_year, end_year):
@@ -63,26 +71,47 @@ class EnergyData:
         return values85
 
     def histdata(self, start_year, end_year):
-        hy_values = self.fetch_data65(ws_hydro, start_year, end_year)[0]
-        ren_values = self.fetch_data65(ws_ren, start_year, end_year)[0]
-        nuc_values = self.fetch_data65(ws_nuc, start_year, end_year)[0]
-        oil_values = self.fetch_data85(ws_oil, start_year, end_year)[0]
-        gas_values = self.fetch_data85(ws_gas, start_year, end_year)[0]
-        coal_values = self.fetch_data85(ws_coal, start_year, end_year)[0]
-        other_values = self.fetch_data85(ws_other, start_year, end_year)[0]
         
         date = list(range(start_year, end_year+1))
-        fuelmix = ["Hydro", "Renewables", "Nuclear", "Oil", "Gas", "Coal", "Other"]
+        
+        if self.valid_country_smaler_range() == True:
+        
+            hy_values = self.fetch_data65(ws_hydro, start_year, end_year)[0]
+            ren_values = self.fetch_data65(ws_ren, start_year, end_year)[0]
+            nuc_values = self.fetch_data65(ws_nuc, start_year, end_year)[0]
+            oil_values = self.fetch_data85(ws_oil, start_year, end_year)[0]
+            gas_values = self.fetch_data85(ws_gas, start_year, end_year)[0]
+            coal_values = self.fetch_data85(ws_coal, start_year, end_year)[0]
+            other_values = self.fetch_data85(ws_other, start_year, end_year)[0]
+
+            fuelmix = ["Hydro", "Renewables", "Nuclear", "Oil", "Gas", "Coal", "Other"]
+            table = [[" "] + fuelmix]
+            for i, year in enumerate(date):
+                row_values = [year] + [hy_values[i], ren_values[i], nuc_values[i], oil_values[i], gas_values[i], coal_values[i], other_values[i]]
+                table.append(row_values)
+
+            df = pd.DataFrame(table[1:], columns=table[0]).set_index(' ')
+            df.reset_index(drop=True)
+            return df.T
+        
+        if self.valid_country_smaler_range() == False:
+
+            hy_values = self.fetch_data65(ws_hydro, start_year, end_year)[0]
+            ren_values = self.fetch_data65(ws_ren, start_year, end_year)[0]
+            nuc_values = self.fetch_data65(ws_nuc, start_year, end_year)[0]
+            total_values = self.fetch_data85(ws_total, start_year, end_year)[0]
 
 
-        table = [[" "] + fuelmix]
-        for i, year in enumerate(date):
-            row_values = [year] + [hy_values[i], ren_values[i], nuc_values[i], oil_values[i], gas_values[i], coal_values[i], other_values[i]]
-            table.append(row_values)
+            fuelmix = ["Hydro", "Renewables", "Nuclear", "Other"]
+            table = [[" "] + fuelmix]
+            for i, year in enumerate(date):
+                row_values_fin = [year] +[hy_values[i], ren_values[i], nuc_values[i], total_values[i] - hy_values[i] - ren_values[i] - nuc_values[i]]
+                table.append(row_values_fin)
 
-        df = pd.DataFrame(table[1:], columns=table[0]).set_index(' ')
-        df.reset_index(drop=True)
-        return df.T
+            df = pd.DataFrame(table[1:], columns=table[0]).set_index(' ')
+            df.reset_index(drop=True)
+            return df.T
+
 
 # method to get generation mix percentage for one country 
 
@@ -133,7 +162,7 @@ class EnergyData:
         name = f"{country}.xlsx"
         file_path = os.path.join(dir_path, name)
         df.to_excel(file_path, index=True)
-        print(f"The data is exported to the '{country}.xlsx' file.")
+        return f"The data is exported to the '{country}.xlsx' file."
 
 #methods to work with PostgreSQL
 
@@ -197,7 +226,7 @@ class EnergyData:
             connection.commit()
             return f"The data is added into '{table_name}' table."
         except Exception as e:
-            return f"Data export failed: the table '{table_name}' doesn't exist."
+            return f"Data export failed: the table '{table_name}' doesn't exist or first/last year might be invalid."
     
     def delete_the_table(self, table_name: str):
         try:
