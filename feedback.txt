@@ -1,0 +1,3 @@
+Liya Tsipenyuk: Energy Generation Tracker
+Your project is really interesting! I am so happy to see you using many concepts that we've learn in class!
+You organized your code using OOP and that's really god because is easy to follow. The comments also are really helpful to understand each piece of code.  
