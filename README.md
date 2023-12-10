@@ -1,6 +1,4 @@
-# DI-Hackathon1
-
-**Project Title:** Energy Generation Tracker
+# DI-Hackathon1: Energy Generation Tracker
 
 **Project Description:**
 Python-based command-line tool that allows users to track and analyze energy generation data from an open database. The tool uses Object-Oriented Programming principles to structure the code effectively and implement the following features:
